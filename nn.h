@@ -82,7 +82,7 @@ NN nn_alloc(size_t *arch, size_t count)
 
 void nn_assert(NN nn)
 {
-    assert(nn.count > 1 && "nn is not initilized");
+
     assert(nn.ws != NULL);
     assert(nn.gws != NULL);
     assert(nn.bs != NULL);
@@ -194,8 +194,8 @@ void nn_backprop(NN nn, Mat input, Mat output, AF af)
                     float pa = MAT_AT(nn.as[l - 1], 0, k);
                     float w = MAT_AT(nn.ws[l - 1], k, j);
                     MAT_AT(nn.gws[l - 1], k, j) += 2 * da * dact(a, af) * pa;
-                    if (l > 0)
-                        MAT_AT(nn.gas[l - 1], k, j) += 2 * da * dact(a, af) * w;
+                    if (l > 1)
+                        MAT_AT(nn.gas[l - 2], k, j) += 2 * da * dact(a, af) * w;
                 }
             }
         }
