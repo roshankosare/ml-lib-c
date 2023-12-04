@@ -12,7 +12,7 @@ int main()
         1, 1};
 
     float To[] = {
-        0, 1, 1, 0};
+        0, 1, 1, 1};
 
     Mat XorTI = {
         .rows = 4,
@@ -23,11 +23,11 @@ int main()
         .cols = 1,
         .es = To};
 
-    size_t arch[] = {2, 4, 1};
+    size_t arch[] = {2, 3, 1};
     size_t count = ARRAY_LEN(arch);
     NN nn = nn_alloc(arch, count);
     float lrate = 1;
-    size_t eps = 20000;
+    size_t eps = 200;
     nn_rand(nn);
     // NN_PRINT(nn);
 
