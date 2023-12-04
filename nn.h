@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "matrix.h"
 #include "nn_utils.h"
+#include "time.h"
 
 #ifndef NN_H
 #define NN_H
@@ -76,7 +77,8 @@ NN nn_alloc(size_t *arch, size_t count)
         mat_assert(nn.bs[i]);
         mat_assert(nn.gbs[i]);
     }
-
+    srand(time(0));
+    nn_rand(nn);
     return nn;
 }
 
@@ -149,7 +151,6 @@ float nn_cost(NN nn, Mat input, Mat output, AF af)
         row_copy(in, input, tr);
         nn_forward(nn, in, af);
         float diff = 0.f;
-        ;
 
         for (size_t j = 0; j < NN_OUTPUT(nn).cols; j++)
         {
@@ -172,9 +173,7 @@ void nn_backprop(NN nn, Mat input, Mat output, AF af)
     Mat in = mat_alloc(1, NN_INPUT(nn).cols);
     for (size_t tr = 0; tr < n; tr++)
     {
-
         row_copy(in, input, tr);
-
         nn_forward(nn, in, af);
         for (size_t l = 0; l < nn.count; l++)
         {
@@ -187,24 +186,20 @@ void nn_backprop(NN nn, Mat input, Mat output, AF af)
 
         for (size_t l = nn.count; l > 0; l--)
         {
-
-            // for (size_t j = 0; j < nn.as[l].cols; j++)
-            // {
-            //     MAT_AT(nn.gas[l - 1], 0, j) = MAT_AT(nn.as[l], 0, j) - MAT_AT(nn.gas[l - 1], 0, j);// calculate diff between gas[l-1] and nn.as[l] and store it in nn.g[l-1]
-            // }
             for (size_t j = 0; j < nn.as[l].cols; j++)
             {
                 float da = MAT_AT(nn.gas[l - 1], 0, j);
                 float a = MAT_AT(nn.as[l], 0, j);
-                MAT_AT(nn.gbs[l - 1], 0, j) += da * dact(a, af);
+                float qa = dact(a, af);
+                MAT_AT(nn.gbs[l - 1], 0, j) += da * qa;
 
                 for (size_t k = 0; k < nn.as[l - 1].cols; k++)
                 {
                     float pa = MAT_AT(nn.as[l - 1], 0, k);
                     float w = MAT_AT(nn.ws[l - 1], k, j);
-                    MAT_AT(nn.gws[l - 1], k, j) += da * dact(a, af) * pa;
+                    MAT_AT(nn.gws[l - 1], k, j) += da * qa * pa;
                     if (l > 1)
-                        MAT_AT(nn.gas[l - 2], k, j) += da * dact(a, af) * w;
+                        MAT_AT(nn.gas[l - 2], k, j) += da * qa * w;
                 }
             }
         }

@@ -8,6 +8,7 @@ typedef enum
     ReLU,
     Sigmoid
 } AF;
+#define RELU_PARAM 0.1f
 #define ARRAY_LEN(x) sizeof((x)) / sizeof((x)[0])
 float rand_float();
 float sigmoidf(float x);
@@ -37,14 +38,7 @@ float dact(float x, AF af)
         return x * (1 - x);
         break;
     case ReLU:
-        if (x < 0)
-        {
-            return 0.0;
-        }
-        else
-        {
-            return 1.0;
-        }
+        return x >= 0 ? 1 : 0;
         break;
 
     default:
