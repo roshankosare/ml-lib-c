@@ -17,13 +17,15 @@ typedef struct
     Mat *gbs; // gradient matrix array for baises matrix array
     Mat *as;  // activation matrix array
     Mat *gas; // gradient matrix array for  activation matrix array
+
 } NN;
 
 #define NN_PRINT(nn) nn_print((nn), #nn);
 #define NN_INPUT(nn) (nn_assert(nn), (nn).as[0])
 #define NN_OUTPUT(nn) (nn_assert(nn), (nn).as[(nn).count])
-// #define NN_INPUT(nn) (nn_assert((nn)), (nn).input)
+
 NN nn_alloc(size_t *arch, size_t count);
+
 void nn_assert(NN nn);
 void nn_rand(NN nn);
 void nn_print(NN nn, const char *name);
@@ -109,9 +111,9 @@ void nn_print(NN nn, const char *name)
     printf("\n %s = [\n", name);
     for (size_t l = 0; l < nn.count; l++)
     {
-        MAT_PRINT(nn.as[l + 1]);
-        MAT_PRINT(nn.ws[l]);
-        MAT_PRINT(nn.bs[l]);
+        MAT_PRINT(nn.as[l + 1], 1);
+        MAT_PRINT(nn.ws[l], 1);
+        MAT_PRINT(nn.bs[l], 1);
     }
 }
 
@@ -154,7 +156,8 @@ float nn_cost(NN nn, Mat input, Mat output, AF af)
 
         for (size_t j = 0; j < NN_OUTPUT(nn).cols; j++)
         {
-            diff = MAT_AT(nn.as[nn.count], 0, j) - MAT_AT(output, tr, j);
+            // diff = MAT_AT(nn.as[nn.count], 0, j) - MAT_AT(output, tr, j);
+            diff = MAT_AT(NN_OUTPUT(nn), 0, j) - MAT_AT(output, tr, j);
             cost += diff * diff;
         }
     }
@@ -199,7 +202,7 @@ void nn_backprop(NN nn, Mat input, Mat output, AF af)
                     float w = MAT_AT(nn.ws[l - 1], k, j);
                     MAT_AT(nn.gws[l - 1], k, j) += da * qa * pa;
                     if (l > 1)
-                        MAT_AT(nn.gas[l - 2], k, j) += da * qa * w;
+                        MAT_AT(nn.gas[l - 2], 0, k) += da * qa * w;
                 }
             }
         }

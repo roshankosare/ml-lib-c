@@ -10,5 +10,5 @@ int main()
     mat_fill(m2, 1);
     Mat m3 = mat_alloc(1, 1);
     mat_dot(m3, m1, m2);
-    MAT_PRINT(m3);
+    MAT_PRINT(m3,0);
 }

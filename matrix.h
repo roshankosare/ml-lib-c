@@ -13,11 +13,11 @@ typedef struct
     float *es;
 } Mat;
 #define MAT_AT(m, i, j) (m).es[(i) * (m).cols + j]
-#define MAT_PRINT(m) mat_print((m), #m);
+#define MAT_PRINT(m, p) mat_print((m), #m, p);
 Mat mat_alloc(size_t rows, size_t cols);
 void mat_assert(Mat m);
 void mat_rand(Mat m);
-void mat_print(Mat m, const char *name);
+void mat_print(Mat m, const char *name, size_t padding);
 void mat_fill(Mat m, float x);
 void mat_copy(Mat dest, Mat src);
 void mat_act(Mat m, AF af);
@@ -52,19 +52,20 @@ void mat_rand(Mat m)
         for (size_t col = 0; col < m.cols; col++)
             MAT_AT(m, row, col) = rand_float();
 }
-void mat_print(Mat m, const char *name)
+void mat_print(Mat m, const char *name, size_t padding)
 {
     mat_assert(m);
-    printf("\n%s = [\n", name);
+    printf("\n%*s%s = [\n", 1 * padding, "", name);
     for (size_t row = 0; row < m.rows; row++)
     {
+        printf("%*s", 2 * padding, "");
         for (size_t col = 0; col < m.cols; col++)
         {
-            printf(" %f", MAT_AT(m, row, col));
+            printf("  %f", MAT_AT(m, row, col));
         }
         printf("\n");
     }
-    printf("]");
+    printf("%*s]", 1 * padding, "");
 }
 void mat_fill(Mat m, float x)
 {
@@ -84,22 +85,9 @@ void mat_copy(Mat dest, Mat src)
 void mat_act(Mat m, AF af)
 {
     mat_assert(m);
-    switch (af)
-    {
-    case ReLU:
-        for (size_t row = 0; row < m.rows; row++)
-            for (size_t col = 0; col < m.cols; col++)
-                MAT_AT(m, row, col) = ReLu(MAT_AT(m, row, col));
-        break;
-    case Sigmoid:
-        for (size_t row = 0; row < m.rows; row++)
-            for (size_t col = 0; col < m.cols; col++)
-                MAT_AT(m, row, col) = sigmoidf(MAT_AT(m, row, col));
-        break;
-
-    default:
-        break;
-    }
+    for (size_t row = 0; row < m.rows; row++)
+        for (size_t col = 0; col < m.cols; col++)
+            MAT_AT(m, row, col) = act(MAT_AT(m, row, col), af);
 }
 void mat_dot(Mat dest, Mat a, Mat b)
 {
@@ -137,13 +125,11 @@ void mat_zero(Mat m)
     mat_assert(m);
     for (size_t row = 0; row < m.rows; row++)
         for (size_t col = 0; col < m.cols; col++)
-            MAT_AT(m, row, col) = 0;
+            MAT_AT(m, row, col) = 0.0;
 }
 
 void row_copy(Mat dest, Mat src, size_t row)
 {
-    // printf("%d",row);
-    // printf("%d\n", src.rows);
     assert(row >= 0 && "invalid row number");
     assert(dest.rows == 1);
     mat_assert(dest);
