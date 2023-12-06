@@ -79,7 +79,7 @@ float dact(float x, AF af)
         return ReLu_derivative(x);
         break;
     case LINEAR:
-        return x;
+        return 1;
 
     default:
         break;
