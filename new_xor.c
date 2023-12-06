@@ -1,5 +1,5 @@
 
-#include "nnt.h"
+#include "nn.h"
 #include "matrix.h"
 
 int main()
