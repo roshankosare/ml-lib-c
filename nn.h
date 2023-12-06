@@ -20,15 +20,17 @@ typedef struct
     Mat ac;
     Mat gac;
     AF af;
+    WI wi;
 } Layer;
 
 typedef struct
 {
     size_t neuron_count;
     AF af;
+    WI wi;
 } CreateLayerInput;
 
-Layer layer_alloc(size_t input_features, size_t neuron_count, AF af);
+Layer layer_alloc(size_t input_features, size_t neuron_count, AF af, WI wi);
 typedef struct
 {
     size_t hidden_count; // size of hidden layers
@@ -37,7 +39,7 @@ typedef struct
     Layer *ls;
 
 } Model;
-Layer layer_alloc(size_t input_features, size_t neuron_count, AF af)
+Layer layer_alloc(size_t input_features, size_t neuron_count, AF af, WI wi)
 {
     assert(neuron_count > 0 && "layer muct contain at least one neuron");
     assert(input_features > 0 && "at lest one input deafture is required");
@@ -50,13 +52,14 @@ Layer layer_alloc(size_t input_features, size_t neuron_count, AF af)
     l.ac = mat_alloc(1, l.neuron_count);
     l.gac = mat_alloc(1, l.neuron_count);
     l.af = af;
+    l.wi = wi;
     return l;
 }
 
 Model create_model(size_t input_features, CreateLayerInput *arch, size_t hidden_layers_count);
 
 void model_assert(Model m);
-void model_rand(Model m);
+void model_init(Model m);
 void model_print(Model m);
 void model_grad_zero(Model m);
 void model_forward(Model m, Mat input);
@@ -77,11 +80,10 @@ Model create_model(size_t input_features, CreateLayerInput *arch, size_t hidden_
     size_t ifts = input_features;
     for (size_t i = 0; i < hidden_layers_count; i++)
     {
-        m.ls[i] = layer_alloc(ifts, arch[i].neuron_count, arch[i].af);
-        // assert(m.ls[i] != NULL && "memory allocation failed for hidden layers");
+        m.ls[i] = layer_alloc(ifts, arch[i].neuron_count, arch[i].af, arch[i].wi);
         ifts = arch[i].neuron_count;
     }
-
+    model_init(m);
     return m;
 }
 
@@ -105,13 +107,21 @@ void model_print(Model m)
     printf("\n]");
 }
 
-void model_rand(Model m)
+void model_init(Model m)
 {
-    srand(time(0));
+    // srand(time(0));
+    srand(44);
     for (size_t l = 0; l < m.hidden_count; l++)
     {
-        mat_rand(m.ls[l].ws);
-        mat_rand(m.ls[l].bs);
+        // mat_rand(m.ls[l].ws);
+        for (int j = 0; j < m.ls[l].ws.rows; j++)
+            for (int k = 0; k < m.ls[l].ws.cols; k++)
+                MAT_AT(m.ls[l].ws, j, k) = weights_init(l == 0 ? m.input.cols : m.ls[l - 1].ac.cols, m.ls[l].ac.cols, m.ls[l].wi);
+        // mat_rand(m.ls[l].bs);
+
+        for (int j = 0; j < m.ls[l].bs.rows; j++)
+            for (int k = 0; k < m.ls[l].bs.cols; k++)
+                MAT_AT(m.ls[l].ws, j, k) = rand_float();
     }
 }
 

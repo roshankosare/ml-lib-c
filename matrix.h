@@ -52,6 +52,7 @@ void mat_rand(Mat m)
         for (size_t col = 0; col < m.cols; col++)
             MAT_AT(m, row, col) = rand_float();
 }
+
 void mat_print(Mat m, const char *name, size_t padding)
 {
     mat_assert(m);
