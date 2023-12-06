@@ -12,7 +12,7 @@ int main()
         1, 1};
 
     float To[] = {
-        0, 1, 1, 1};
+        0, 1, 1, 0};
 
     Mat XorTI = {
         .rows = 4,
@@ -23,12 +23,13 @@ int main()
         .cols = 1,
         .es = To};
 
-    CreateLayerInput arch[] = {{.neuron_count = 2, af : Sigmoid}, {.neuron_count = 1, af : Sigmoid}};
+    CreateLayerInput arch[] = {{.neuron_count = 3, .af = ReLU}, {.neuron_count = 1, .af = Sigmoid}};
     size_t count = ARRAY_LEN(arch);
     Model m = create_model(2, arch, count);
     model_rand(m);
+
     float lrate = 1;
-    size_t eps = 100000;
+    size_t eps = 500;
     printf("cost:%f", model_cost(m, XorTI, XorTO));
     model_train(m, XorTI, XorTO, lrate, eps);
     model_test(m, XorTI, XorTO);

@@ -107,8 +107,7 @@ void model_print(Model m)
 
 void model_rand(Model m)
 {
-
-    // TODO :- implement different weights intialization techniques
+    srand(time(0));
     for (size_t l = 0; l < m.hidden_count; l++)
     {
         mat_rand(m.ls[l].ws);
@@ -131,6 +130,7 @@ void model_forward(Model m, Mat input)
     mat_copy(m.input, input);
     for (size_t l = 0; l < m.hidden_count; l++)
     {
+
         // if first layer then get action form input matrix else get activation form previous layer
         l == 0 ? mat_dot(m.ls[l].ac, m.input, m.ls[l].ws) : mat_dot(m.ls[l].ac, m.ls[l - 1].ac, m.ls[l].ws);
         mat_sum(m.ls[l].ac, m.ls[l].bs);
@@ -201,7 +201,7 @@ void model_backprop(Model m, Mat input, Mat output)
                 {
                     float pa = l == 0 ? MAT_AT(m.input, 0, k) : MAT_AT(m.ls[l - 1].ac, 0, k);
                     float w = MAT_AT(m.ls[l].ws, k, j);
-                    MAT_AT(m.ls[l].gbs, k, j) += da * qa * pa;
+                    MAT_AT(m.ls[l].gws, k, j) += da * qa * pa;
                     if (l > 0)
                         MAT_AT(m.ls[l - 1].gac, 0, k) += da * qa * w;
                 }
@@ -229,12 +229,12 @@ void model_train(Model m, Mat input, Mat output, float lrate, size_t eps)
         model_backprop(m, input, output);
         for (size_t l = 0; l < m.hidden_count; l++)
         {
-            for (size_t j = 0; j < m.ls[l].gws.rows; j++)
-                for (size_t k = 0; k < m.ls[l].gws.cols; k++)
+            for (size_t j = 0; j < m.ls[l].ws.rows; j++)
+                for (size_t k = 0; k < m.ls[l].ws.cols; k++)
                     MAT_AT(m.ls[l].ws, j, k) -= lrate * MAT_AT(m.ls[l].gws, j, k);
 
-            for (size_t j = 0; j < m.ls[l].gbs.rows; j++)
-                for (size_t k = 0; k < m.ls[l].gbs.cols; k++)
+            for (size_t j = 0; j < m.ls[l].bs.rows; j++)
+                for (size_t k = 0; k < m.ls[l].bs.cols; k++)
                     MAT_AT(m.ls[l].bs, j, k) -= lrate * MAT_AT(m.ls[l].gbs, j, k);
         }
     }
@@ -250,6 +250,7 @@ void model_test(Model m, Mat input, Mat output)
     for (size_t tr = 0; tr < input.rows; tr++)
     {
         row_copy(in, input, tr);
+
         model_forward(m, in);
 
         printf("\nInput:=[");
