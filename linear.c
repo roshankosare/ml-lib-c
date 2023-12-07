@@ -19,8 +19,9 @@ int main()
     size_t count = ARRAY_LEN(arch);
     Model m = create_model(1, arch, count);
     float rate = 1e-2;
-    size_t ep = 1000;
+    size_t ep = 100000;
 
     model_train(m, TI, TO, rate, ep);
     model_test(m, TI, TO);
+   
 }

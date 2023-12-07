@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
+#include<string.h>
 #ifndef NN_UTILS_H
 #define NN_UTILS_H
 
@@ -26,6 +27,7 @@ float ReLu(float x);
 float ReLu_derivative(float x);
 float he_init(int input_size);
 float xavier_init(int input_size, int output_size);
+int isCSVFile(const char *filename);
 
 float rand_float()
 {
@@ -114,6 +116,22 @@ float weights_init(int input_size, int output_size, WI wi)
 
     default:
         break;
+    }
+}
+
+int isCSVFile(const char *filename)
+{
+    // Get the length of the filename
+    size_t len = strlen(filename);
+
+    // Check if the filename ends with ".csv"
+    if (len >= 4 && strcmp(filename + len - 4, ".csv") == 0)
+    {
+        return 1; // It is a CSV file
+    }
+    else
+    {
+        return 0; // It is not a CSV file
     }
 }
 

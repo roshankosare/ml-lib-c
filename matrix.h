@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "nn_utils.h"
+#include <string.h>
 
 #ifndef MATRIX_H
 #define MATRIX_H
@@ -12,6 +13,12 @@ typedef struct
     size_t cols;
     float *es;
 } Mat;
+
+typedef struct
+{
+    Mat inputs;
+    Mat outputs;
+} DataMatrix;
 #define MAT_AT(m, i, j) (m).es[(i) * (m).cols + j]
 #define MAT_PRINT(m, p) mat_print((m), #m, p);
 Mat mat_alloc(size_t rows, size_t cols);
@@ -25,6 +32,8 @@ void mat_dot(Mat dest, Mat a, Mat b);
 void mat_sum(Mat dest, Mat src);
 void mat_zero(Mat m);
 void row_copy(Mat dest, Mat src, size_t row);
+Mat csvToMat(const char *filename);
+Mat mat_sub(Mat m, int rows, int cols, int col_offset);
 
 Mat mat_alloc(size_t rows, size_t cols)
 {
@@ -140,6 +149,65 @@ void row_copy(Mat dest, Mat src, size_t row)
 
     for (size_t j = 0; j < src.cols; j++)
         MAT_AT(dest, 0, j) = MAT_AT(src, row, j);
+}
+
+Mat mat_sub(Mat m, int rows, int cols, int col_offset)
+{
+    mat_assert(m);
+    assert(rows > 0 && "invlaid row_max value");
+    assert(rows <= m.rows && "invalid input for mat_sub rows is larger thar matrix rows");
+    assert(cols > 0 && "invlaid row_max value");
+    assert(cols <= m.cols && "invalid input for mat_sub row_max is larger thar matrix rows");
+    assert(col_offset < m.cols && "invlaid value for col_offset");
+    assert(col_offset >= 0 && "invlaid value for col_offset");
+    Mat x = mat_alloc(rows, cols);
+    for (int i = 0; i < x.rows; i++)
+        for (int j = 0; j < x.cols; j++)
+            MAT_AT(x, i, j) = MAT_AT(m, i, j + col_offset);
+
+    return x;
+}
+
+Mat csvToMat(const char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    char buffer[1024];
+    assert(file != NULL && "can not open a csv file");
+    fgets(buffer, sizeof(buffer), file);
+    int rows = 0;
+    int cols = 0;
+    char *token = strtok(buffer, ",");
+    char *endptr;
+    while (token != NULL)
+    {
+        token = strtok(NULL, ",");
+        cols++;
+    }
+    while (fgets(buffer, sizeof(buffer), file))
+    {
+        rows++;
+    }
+
+    Mat m = mat_alloc(rows, cols);
+    rows = 0;
+    cols = 0;
+    fseek(file, 0, SEEK_SET);
+    double value;
+
+    fgets(buffer, sizeof(buffer), file);
+    while (fgets(buffer, sizeof(buffer), file))
+    {
+        token = strtok(buffer, ",");
+        cols = 0;
+        while (token != NULL)
+        {
+            MAT_AT(m, rows, cols) = (float)atof(token);
+            token = strtok(NULL, ",");
+            cols++;
+        }
+        rows++;
+    }
+    return m;
 }
 
 #endif

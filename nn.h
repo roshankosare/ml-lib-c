@@ -109,19 +109,18 @@ void model_print(Model m)
 
 void model_init(Model m)
 {
-    // srand(time(0));
+    srand(time(0));
     srand(44);
     for (size_t l = 0; l < m.hidden_count; l++)
     {
-        // mat_rand(m.ls[l].ws);
+
         for (int j = 0; j < m.ls[l].ws.rows; j++)
             for (int k = 0; k < m.ls[l].ws.cols; k++)
                 MAT_AT(m.ls[l].ws, j, k) = weights_init(l == 0 ? m.input.cols : m.ls[l - 1].ac.cols, m.ls[l].ac.cols, m.ls[l].wi);
-        // mat_rand(m.ls[l].bs);
 
         for (int j = 0; j < m.ls[l].bs.rows; j++)
             for (int k = 0; k < m.ls[l].bs.cols; k++)
-                MAT_AT(m.ls[l].ws, j, k) = rand_float();
+                MAT_AT(m.ls[l].bs, j, k) = 0;
     }
 }
 
